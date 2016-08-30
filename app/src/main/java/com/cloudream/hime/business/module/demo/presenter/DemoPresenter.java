@@ -6,10 +6,15 @@ import com.cloudream.hime.business.base.BasePresenter;
 import com.cloudream.hime.business.bean.BaseBean;
 import com.cloudream.hime.business.bean.DemoBean;
 import com.cloudream.hime.business.bean.Params;
+import com.cloudream.hime.business.common.retrofit.ApiService;
 import com.cloudream.hime.business.common.retrofit.RequestEntity;
 import com.cloudream.hime.business.module.demo.view.IdemoView;
 
 import java.util.ArrayList;
+
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
 
 /**
  * Created by admin on 2016/8/29.
@@ -43,21 +48,23 @@ public class DemoPresenter extends BasePresenter{
         demoBean1.setJsonrpc("2.0");
         arrayList1.add(params1);
         demoBean1.setParams(arrayList1);
-        subscription = RequestEntity.request(RequestEntity.getApiService().GetAear(demoBean1),this,1);
+        ApiService apiService = RequestEntity.getApiService();
+        Observable observable = apiService.GetAear(demoBean1);
+        subscription =  RequestEntity.request(observable,this,1);
+//        subscription = RequestEntity.request(RequestEntity.getApiService().GetAear(demoBean1),this,1);//将方法名作为唯一的标识作为请求返回
     }
 
     @Override
     public void onSuccee(Object response, int code) {
         if(response != null) {
             mDemoView.setTextView("code:"+code+"----"+response.toString());
-            Log.i("yzmhand","code:"+code+"----"+response.toString());
         }
     }
 
     @Override
     public void onError(Throwable e) {
         if(e != null) {
-            Log.i("yzmhand", e.toString());
+            Log.e("yzmhand", e.toString());
         }
     }
 }

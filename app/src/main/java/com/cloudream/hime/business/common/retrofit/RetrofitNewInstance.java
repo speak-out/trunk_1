@@ -1,8 +1,6 @@
 package com.cloudream.hime.business.common.retrofit;
 
 import com.cloudream.hime.business.config.Constant;
-import com.cloudream.hime.business.common.retrofit.LogInterceptor;
-import com.cloudream.hime.business.common.retrofit.RequestInterceptor;
 
 import okhttp3.OkHttpClient;
 import retrofit2.CallAdapter;
@@ -25,8 +23,8 @@ public class RetrofitNewInstance {
         }
         mOkHttpClient =
                 new OkHttpClient().newBuilder()
+                        .addInterceptor(new ResponseInterceptor())
                         .addInterceptor(new RequestInterceptor())
-                        .addInterceptor(new LogInterceptor())
                         .build();
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(Constant.serverIp)

@@ -35,6 +35,7 @@ public class RequestEntity {
     }
 
     public static Subscription request(Observable<Object> observable, ResponseInterface requestFace, final int code) {
+
         final ResponseInterface request = requestFace;
         Observer observer = new Observer<Object>() {
 
@@ -47,71 +48,27 @@ public class RequestEntity {
             @Override
             public void onError(Throwable e) {
                 Log.e(TAG, "onError: " + e.toString());
-                request.onError(e);
+                Object object = CacheDataBase.readCache("longjian");
+                if (object != null && !object.equals("")) {
+                    request.onSuccee(object, code);
+                } else {
+                    request.onError(e);
+                }
             }
 
             @Override
             public void onNext(Object response) {
+                CacheDataBase.saveCache(response, "longjian");
                 request.onSuccee(response, code);
             }
         };
-
-        return observable
-                .doOnNext(new Action1<Object>() {
-                    @Override
-                    public void call(Object o) {
-                        CacheDataBase.getInstance(BaseApplication.getInstance()).saveCache(o,"longjian");
-                    }
-                })
+        Subscription subscruiption = observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
-    }
-
-    public Subscription subscribeData(@NonNull Observer<Object> observer) {  //传入一个用来做处理的observer 处理请求的数据的observer
-        if (cache == null) {   //没有缓存
-            cache = BehaviorSubject.create();  //双面间谍 BehaviorSubject
-            Observable.create(new Observable.OnSubscribe<Object>() {
-                @Override
-                public void call(Subscriber<? super Object> subscriber) {
-                    Object object = CacheDataBase.getInstance(BaseApplication.getInstance()).readCache("longjain");
-                    if (object == null) {
-//                        loadFromNetwork();
-                    } else {
-//                        setDataSource(DATA_SOURCE_DISK);
-                        subscriber.onNext(object);
-                    }
-                }
-            })
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(cache);//这里BehaviorSubject这里充当observer
-        } else {
-//            setDataSource(DATA_SOURCE_MEMORY);
-        }
-        return cache.observeOn(AndroidSchedulers.mainThread()).subscribe(observer); //这里BehaviorSubject充当observable
+        return subscruiption;
     }
 }
 
-//    public void loadFromNetwork() {
-//        Network.getGankApi()
-//                .getBeauties(100, 1)
-//                .subscribeOn(Schedulers.io())
-//                .map(GankBeautyResultToItemsMapper.getInstance())
-//                .doOnNext(new Action1<List<Item>>() {
-//                    @Override
-//                    public void call(List<Item> items) {
-//                        Database.getInstance().writeItems(items);
-//                    }
-//                })
-//                .subscribe(new Action1<List<Item>>() {
-//                    @Override
-//                    public void call(List<Item> items) {
-//                        cache.onNext(items);
-//                    }
-//                }, new Action1<Throwable>() {
-//                    @Override
-//                    public void call(Throwable throwable) {
-//                        throwable.printStackTrace();
-//                    }
-//                });
+
 

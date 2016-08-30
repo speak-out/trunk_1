@@ -1,5 +1,8 @@
 package com.cloudream.hime.business.common.retrofit;
 
+import android.util.Log;
+
+import com.cloudream.hime.business.common.database.CacheDataBase;
 import com.cloudream.hime.business.config.RequestConstant;
 
 import java.io.IOException;
